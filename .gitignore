@@ -1,0 +1,22 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+**/[Bb]in/
+**/[Oo]bj/
+
+# NuGet packages
+packages/
+*.nupkg
+
+# Logs
+*.log
+
+# ASP.NET generated data
+LMS/App_Data/*.mdf
+LMS/App_Data/*.ldf
+
