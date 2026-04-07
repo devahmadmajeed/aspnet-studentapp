@@ -1,0 +1,166 @@
+@{
+    ViewBag.Title = "Students (jQuery CRUD)";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Students (jQuery CRUD)</h2>
+
+<div class="row">
+    <div class="col-md-5">
+        <form id="studentForm">
+            <input type="hidden" id="studentId" />
+            <div class="form-group">
+                <label for="studentName">Name</label>
+                <input type="text" class="form-control" id="studentName" placeholder="Enter name" required />
+            </div>
+            <div class="form-group">
+                <label for="studentEmail">Email</label>
+                <input type="email" class="form-control" id="studentEmail" placeholder="Enter email" required />
+            </div>
+            <div class="form-group">
+                <label for="studentAge">Age</label>
+                <input type="number" class="form-control" id="studentAge" placeholder="Enter age" min="0" />
+            </div>
+            <div class="mt-2">
+                <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-7">
+        <table class="table table-bordered table-striped" id="studentsTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th style="width:140px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="col-md-12">
+        <div id="message" class="alert" style="display:none;"></div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.7.0.min.js"></script>
+<script>
+    $(function () {
+        function showMessage(type, text) {
+            var $m = $('#message');
+            $m.removeClass('alert-success alert-danger').addClass(type === 'success' ? 'alert-success' : 'alert-danger');
+            $m.text(text).fadeIn(150);
+            setTimeout(function () { $m.fadeOut(200); }, 2500);
+        }
+
+        function resetForm() {
+            $('#studentId').val('');
+            $('#studentName').val('');
+            $('#studentEmail').val('');
+            $('#studentAge').val('');
+            $('#saveBtn').text('Save');
+        }
+
+        function renderRows(students) {
+            var $tbody = $('#studentsTable tbody');
+            $tbody.empty();
+            $.each(students, function (_, s) {
+                var tr = '<tr>' +
+                    '<td>' + s.Id + '</td>' +
+                    '<td>' + s.Name + '</td>' +
+                    '<td>' + s.Email + '</td>' +
+                    '<td>' + s.Age + '</td>' +
+                    '<td>' +
+                    '<button class="btn btn-sm btn-info editBtn" data-id="' + s.Id + '">Edit</button> ' +
+                    '<button class="btn btn-sm btn-danger deleteBtn" data-id="' + s.Id + '">Delete</button>' +
+                    '</td>' +
+                    '</tr>';
+                $tbody.append(tr);
+            });
+        }
+
+        function loadStudents() {
+            $.getJSON('@Url.Action("GetStudents", "Students")', function (data) {
+                renderRows(data || []);
+            }).fail(function () {
+                showMessage('error', 'Failed to load students.');
+            });
+        }
+
+        $('#studentForm').on('submit', function (e) {
+            e.preventDefault();
+            var id = $('#studentId').val();
+            var payload = {
+                Id: id ? parseInt(id) : 0,
+                Name: $('#studentName').val(),
+                Email: $('#studentEmail').val(),
+                Age: parseInt($('#studentAge').val() || 0)
+            };
+
+            var isUpdate = !!id;
+            var url = isUpdate
+                ? '@Url.Action("UpdateStudent", "Students")'
+                : '@Url.Action("AddStudent", "Students")';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: payload
+            }).done(function (ok) {
+                if (ok === true || ok === 'true') {
+                    showMessage('success', isUpdate ? 'Student updated.' : 'Student added.');
+                    resetForm();
+                    loadStudents();
+                } else {
+                    showMessage('error', 'Operation failed.');
+                }
+            }).fail(function () {
+                showMessage('error', 'Request failed.');
+            });
+        });
+
+        $('#resetBtn').on('click', function () {
+            resetForm();
+        });
+
+        $('#studentsTable').on('click', '.editBtn', function () {
+            var id = $(this).data('id');
+            $.getJSON('@Url.Action("GetStudentById", "Students")', { id: id }, function (s) {
+                if (!s) { showMessage('error', 'Student not found.'); return; }
+                $('#studentId').val(s.Id);
+                $('#studentName').val(s.Name);
+                $('#studentEmail').val(s.Email);
+                $('#studentAge').val(s.Age);
+                $('#saveBtn').text('Update');
+                $('html, body').animate({ scrollTop: 0 }, 200);
+            }).fail(function () {
+                showMessage('error', 'Failed to load student.');
+            });
+        });
+
+        $('#studentsTable').on('click', '.deleteBtn', function () {
+            if (!confirm('Delete this student?')) return;
+            var id = $(this).data('id');
+            $.post('@Url.Action("DeleteStudent", "Students")', { id: id })
+                .done(function (ok) {
+                    if (ok === true || ok === 'true') {
+                        showMessage('success', 'Student deleted.');
+                        loadStudents();
+                    } else {
+                        showMessage('error', 'Delete failed.');
+                    }
+                })
+                .fail(function () {
+                    showMessage('error', 'Request failed.');
+                });
+        });
+
+        loadStudents();
+    });
+</script>
+
