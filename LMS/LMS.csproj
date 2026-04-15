@@ -127,12 +127,15 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\StudentPortalController.cs" />
     <Compile Include="Controllers\StudentsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AppDbContext.cs" />
+    <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -182,8 +185,10 @@
     </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_StudentLayout.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -192,6 +197,15 @@
     <Content Include="Views\Students\Details.cshtml" />
     <Content Include="Views\Students\Edit.cshtml" />
     <Content Include="Views\Students\Index.cshtml" />
+    <Content Include="Views\Students\JQuery.cshtml" />
+    <Content Include="Views\StudentPortal\Announcements.cshtml" />
+    <Content Include="Views\StudentPortal\Assignments.cshtml" />
+    <Content Include="Views\StudentPortal\Courses.cshtml" />
+    <Content Include="Views\StudentPortal\Grades.cshtml" />
+    <Content Include="Views\StudentPortal\Index.cshtml" />
+    <Content Include="Views\StudentPortal\MyProfile.cshtml" />
+    <Content Include="Views\StudentPortal\Schedule.cshtml" />
+    <Content Include="Views\StudentPortal\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

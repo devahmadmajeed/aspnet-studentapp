@@ -12,6 +12,9 @@ namespace StudentApp.Models
         [Required]
         public string Email { get; set; }
 
+        /// <summary>Login password (plain text for learning only; hash passwords in production).</summary>
+        public string Password { get; set; }
+
         public int Age { get; set; }
     }
 }

@@ -1,62 +1,100 @@
 ﻿using StudentApp.Models;
-using System.Web.Mvc;
+using System;
 using System.Linq;
+using System.Web.Mvc;
 
-public class StudentsController : Controller
+namespace LMS.Controllers
 {
-    private AppDbContext db = new AppDbContext();
-
-    // Default route for /Students -> show jQuery CRUD view
-    public ActionResult Index()
+    public class StudentsController : Controller
     {
-        return View("JQuery");
-    }
+        private readonly AppDbContext db = new AppDbContext();
 
-    // Simple jQuery-based CRUD page
-    public ActionResult JQuery()
-    {
-        return View();
-    }
+        public ActionResult Index()
+        {
+            return View("JQuery");
+        }
 
-    // GET ALL
-    public JsonResult GetStudents()
-    {
-        var data = db.Students.ToList();
-        return Json(data, JsonRequestBehavior.AllowGet);
-    }
+        public ActionResult JQuery()
+        {
+            return View();
+        }
 
-    // ADD
-    [HttpPost]
-    public JsonResult AddStudent(Student s)
-    {
-        db.Students.Add(s);
-        db.SaveChanges();
-        return Json(true);
-    }
+        public JsonResult GetStudents()
+        {
+            try
+            {
+                var data = db.Students
+                    .ToList()
+                    .Select(s => new { s.Id, s.Name, s.Email, s.Age });
+                return Json(data, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.GetBaseException().Message;
+#if !DEBUG
+                msg = "Database error. Check Web.config connection string, SQL Server is running, and the Students table matches the model (e.g. Password column).";
+#endif
+                return Json(new { __error = msg }, JsonRequestBehavior.AllowGet);
+            }
+        }
 
-    // GET BY ID
-    public JsonResult GetStudentById(int id)
-    {
-        var data = db.Students.Find(id);
-        return Json(data, JsonRequestBehavior.AllowGet);
-    }
+        [HttpPost]
+        public JsonResult AddStudent(Student s)
+        {
+            if (string.IsNullOrWhiteSpace(s.Password))
+            {
+                return Json(false);
+            }
 
-    // UPDATE
-    [HttpPost]
-    public JsonResult UpdateStudent(Student s)
-    {
-        db.Entry(s).State = System.Data.Entity.EntityState.Modified;
-        db.SaveChanges();
-        return Json(true);
-    }
+            db.Students.Add(s);
+            db.SaveChanges();
+            return Json(true);
+        }
 
-    // DELETE
-    [HttpPost]
-    public JsonResult DeleteStudent(int id)
-    {
-        var data = db.Students.Find(id);
-        db.Students.Remove(data);
-        db.SaveChanges();
-        return Json(true);
+        public JsonResult GetStudentById(int id)
+        {
+            var s = db.Students.Find(id);
+            if (s == null)
+            {
+                return Json(null, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { s.Id, s.Name, s.Email, s.Age }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateStudent(Student s)
+        {
+            var existing = db.Students.Find(s.Id);
+            if (existing == null)
+            {
+                return Json(false);
+            }
+
+            existing.Name = s.Name;
+            existing.Email = s.Email;
+            existing.Age = s.Age;
+            if (!string.IsNullOrWhiteSpace(s.Password))
+            {
+                existing.Password = s.Password;
+            }
+
+            db.SaveChanges();
+            return Json(true);
+        }
+
+        [HttpPost]
+        public JsonResult DeleteStudent(int id)
+        {
+            var data = db.Students.Find(id);
+            if (data == null)
+            {
+                return Json(false);
+            }
+
+            db.Students.Remove(data);
+            db.SaveChanges();
+            return Json(true);
+        }
     }
 }

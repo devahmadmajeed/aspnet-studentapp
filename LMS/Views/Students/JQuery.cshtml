@@ -18,6 +18,10 @@
                 <input type="email" class="form-control" id="studentEmail" placeholder="Enter email" required />
             </div>
             <div class="form-group">
+                <label for="studentPassword">Password <span class="text-muted small">(for student login)</span></label>
+                <input type="password" class="form-control" id="studentPassword" placeholder="Password" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
                 <label for="studentAge">Age</label>
                 <input type="number" class="form-control" id="studentAge" placeholder="Enter age" min="0" />
             </div>
@@ -62,6 +66,7 @@
             $('#studentId').val('');
             $('#studentName').val('');
             $('#studentEmail').val('');
+            $('#studentPassword').val('');
             $('#studentAge').val('');
             $('#saveBtn').text('Save');
         }
@@ -85,10 +90,25 @@
         }
 
         function loadStudents() {
-            $.getJSON('@Url.Action("GetStudents", "Students")', function (data) {
-                renderRows(data || []);
-            }).fail(function () {
-                showMessage('error', 'Failed to load students.');
+            $.ajax({
+                url: '@Url.Action("GetStudents", "Students")',
+                dataType: 'json',
+                type: 'GET'
+            }).done(function (data) {
+                if (data && data.__error) {
+                    showMessage('error', data.__error);
+                    return;
+                }
+                if (!$.isArray(data)) {
+                    showMessage('error', 'Unexpected response from server.');
+                    return;
+                }
+                renderRows(data);
+            }).fail(function (xhr) {
+                var detail = xhr.responseJSON && xhr.responseJSON.__error
+                    ? xhr.responseJSON.__error
+                    : (xhr.status ? ('HTTP ' + xhr.status + ' ') : '') + (xhr.statusText || xhr.responseText || '');
+                showMessage('error', 'Failed to load students. ' + (detail || 'Check browser Network tab for the GetStudents request.'));
             });
         }
 
@@ -99,6 +119,7 @@
                 Id: id ? parseInt(id) : 0,
                 Name: $('#studentName').val(),
                 Email: $('#studentEmail').val(),
+                Password: $('#studentPassword').val(),
                 Age: parseInt($('#studentAge').val() || 0)
             };
 
@@ -117,7 +138,7 @@
                     resetForm();
                     loadStudents();
                 } else {
-                    showMessage('error', 'Operation failed.');
+                    showMessage('error', isUpdate ? 'Update failed (check fields).' : 'Add failed: password is required for new students.');
                 }
             }).fail(function () {
                 showMessage('error', 'Request failed.');
@@ -135,6 +156,7 @@
                 $('#studentId').val(s.Id);
                 $('#studentName').val(s.Name);
                 $('#studentEmail').val(s.Email);
+                $('#studentPassword').val('');
                 $('#studentAge').val(s.Age);
                 $('#saveBtn').text('Update');
                 $('html, body').animate({ scrollTop: 0 }, 200);

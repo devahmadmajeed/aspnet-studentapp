@@ -1,0 +1,34 @@
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0">Dashboard</h1>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 text-muted">Welcome</h2>
+                <p class="mb-0">You are signed in as <strong>@User.Identity.Name</strong>. Use the menu to open sample LMS pages.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 text-muted">Next steps</h2>
+                <p class="small mb-0">Connect each menu page to real data from your database when you are ready.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 text-muted">Tip</h2>
+                <p class="small mb-0">Add students with email and password on the CRUD page, then use those credentials here.</p>
+            </div>
+        </div>
+    </div>
+</div>
